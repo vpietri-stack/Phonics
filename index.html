@@ -163,6 +163,18 @@
       outline-offset: 3px;
     }
 
+    .tile.correct {
+      background: #C6F6D5;
+      border-color: #38A169;
+      color: #22543D;
+    }
+
+    .tile.incorrect {
+      background: #FED7D7;
+      border-color: #E53E3E;
+      color: #822727;
+    }
+
     #timer {
       margin-left: .5rem;
       font-weight: 900;
@@ -581,6 +593,7 @@
       }
 
       function moveTileToBankFromSlot(tile, slot) {
+        tile.classList.remove('correct', 'incorrect');
         const idx = Number(slot.dataset.index);
         bankEl.appendChild(tile);
         slot.textContent = '';
@@ -590,11 +603,29 @@
 
       // Completion check
       function checkIfComplete() {
-        if (!slots.every(s => s !== null)) return;
-        const attempt = slots.join(' ');
-        const target = sentenceToWords(current).join(' ');
+        // Reset feedback on all tiles in slots currently
+        document.querySelectorAll('.slot .tile').forEach(t => t.classList.remove('correct', 'incorrect'));
 
-        if (attempt.toLowerCase() === target.toLowerCase()) {
+        if (!slots.every(s => s !== null)) return;
+
+        const targetWords = sentenceToWords(current);
+        let allCorrect = true;
+
+        // Apply visual feedback
+        slots.forEach((word, index) => {
+          const slot = targetEl.children[index];
+          const tile = slot.querySelector('.tile');
+          if (tile) {
+            if (word.toLowerCase() === targetWords[index].toLowerCase()) {
+              tile.classList.add('correct');
+            } else {
+              tile.classList.add('incorrect');
+              allCorrect = false;
+            }
+          }
+        });
+
+        if (allCorrect) {
           // Correct!
           completedCount++;
           statusMsg.textContent = `✅ 正确！`;
@@ -605,79 +636,81 @@
             endGame();
           } else {
             round++;
-            // Wrap around if we run out of sentences (though with 10 goal and ~30 sentences, unlikely)
+            // Wrap around if we run out of sentences
             if (round >= order.length) { order = shuffle([...sentences]); round = 0; }
             setTimeout(() => { if (gameActive) { renderRound(); speak(current); } }, 1000);
           }
         } else {
-          // Incorrect - just feedback, reset tiles? No, user requested "don't go next until correct".
-          // So we just say incorrect and let them fix it.
-          statusMsg.textContent = '❌ 不对，请检查顺序。';
+          // Incorrect
+          statusMsg.textContent = '❌ 不对，请调整红色单词的位置。';
           statusMsg.classList.remove('ok'); statusMsg.classList.add('no');
           playBuzz();
-          // Optionally reset? The prompt says "don't let the student go to the next sentence until... correct".
-          // Usually better to let them adjust tiles rather than full reset.
-          // But to be helpful, maybe we can reject only the wrong ones? 
-          // For simple mechanics: just play buzz and keep tiles as is.
         }
         updateHUD();
       }
-
-      // HUD + timer
-      function updateHUD() {
-        progressEl.textContent = `${completedCount}/${GOAL}`;
+      // Optionally reset? The prompt says "don't let the student go to the next sentence until... correct".
+      // Usually better to let them adjust tiles rather than full reset.
+      // But to be helpful, maybe we can reject only the wrong ones? 
+      // For simple mechanics: just play buzz and keep tiles as is.
+    }
+        updateHUD();
       }
 
-      function formatTime(ms) {
-        const totalSeconds = Math.floor(ms / 1000);
-        const m = Math.floor(totalSeconds / 60);
-        const s = totalSeconds % 60;
-        return `${m}分${s}秒`;
-      }
+    // HUD + timer
+    function updateHUD() {
+      progressEl.textContent = `${completedCount}/${GOAL}`;
+    }
 
-      function startTimer() {
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-          if (!gameActive) return;
-          const elapsed = Date.now() - startTime;
-          timerEl.textContent = Math.floor(elapsed / 1000) + 's';
-        }, 1000);
-      }
+    function formatTime(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const m = Math.floor(totalSeconds / 60);
+      const s = totalSeconds % 60;
+      return `${m}分${s}秒`;
+    }
 
-      function endGame() {
-        gameActive = false;
-        clearInterval(timerInterval);
-        const totalTime = formatTime(Date.now() - startTime);
-        finalTimeEl.textContent = totalTime;
-        endScreen.style.display = 'flex';
-      }
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (!gameActive) return;
+        const elapsed = Date.now() - startTime;
+        timerEl.textContent = Math.floor(elapsed / 1000) + 's';
+      }, 1000);
+    }
 
-      // Events
-      // Init Class Selector
-      const classSelector = document.getElementById('classSelector');
-      const classButtons = document.getElementById('classButtons');
+    function endGame() {
+      gameActive = false;
+      clearInterval(timerInterval);
+      const totalTime = formatTime(Date.now() - startTime);
+      finalTimeEl.textContent = totalTime;
+      endScreen.style.display = 'flex';
+    }
 
-      if (typeof CURRICULUM !== 'undefined') {
-        Object.keys(CURRICULUM).forEach(key => {
-          const btn = document.createElement('button');
-          btn.className = 'primary';
-          btn.textContent = CURRICULUM[key].label;
-          btn.style.width = '100%';
-          btn.onclick = () => {
-            sentences = CURRICULUM[key].content;
-            classSelector.style.display = 'none';
-            overlay.style.display = 'flex';
-          };
-          classButtons.appendChild(btn);
-        });
-      } else {
-        classButtons.innerHTML = '<p style="color:red">Error: Data not loaded.</p>';
-      }
+    // Events
+    // Init Class Selector
+    const classSelector = document.getElementById('classSelector');
+    const classButtons = document.getElementById('classButtons');
 
-      startBtn.addEventListener('click', () => { overlay.style.display = 'none'; startGame(); });
-      repeatBtn.addEventListener('click', () => { if (gameActive) { ensureAudioCtx(); speak(current); } });
-      retryBtn.addEventListener('click', () => { endScreen.style.display = 'none'; startGame(); });
-    })();
+    if (typeof CURRICULUM !== 'undefined') {
+      Object.keys(CURRICULUM).forEach(key => {
+        const btn = document.createElement('button');
+        btn.className = 'primary';
+        btn.textContent = CURRICULUM[key].label;
+        btn.style.width = '100%';
+        btn.onclick = () => {
+          sentences = CURRICULUM[key].content;
+          classSelector.style.display = 'none';
+          overlay.style.display = 'flex';
+        };
+        classButtons.appendChild(btn);
+      });
+    } else {
+      classButtons.innerHTML = '<p style="color:red">Error: Data not loaded.</p>';
+    }
+
+    startBtn.addEventListener('click', () => { overlay.style.display = 'none'; startGame(); });
+    repeatBtn.addEventListener('click', () => { if (gameActive) { ensureAudioCtx(); speak(current); } });
+    retryBtn.addEventListener('click', () => { endScreen.style.display = 'none'; startGame(); });
+    }) ();
   </script>
 </body>
 
