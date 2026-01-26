@@ -142,6 +142,12 @@
 
     .tile.dragging {
       opacity: .7;
+      z-index: 1000;
+    }
+
+    .tile {
+      touch-action: none;
+      /* Prevents scrolling during drag */
     }
 
     .status {
@@ -723,6 +729,73 @@
       startBtn.addEventListener('click', () => { overlay.style.display = 'none'; startGame(); });
       repeatBtn.addEventListener('click', () => { if (gameActive) { ensureAudioCtx(); speak(current); } });
       retryBtn.addEventListener('click', () => { endScreen.style.display = 'none'; startGame(); });
+
+      // --- MOBILE TOUCH DRAG & DROP ---
+      let touchData = { active: null, startX: 0, startY: 0 };
+
+      document.addEventListener('touchstart', (e) => {
+        const tile = e.target.closest('.tile');
+        if (!tile || !gameActive) return;
+
+        e.preventDefault();
+        touchData.active = tile;
+        const t = e.touches[0];
+        touchData.startX = t.clientX;
+        touchData.startY = t.clientY;
+
+        const parent = tile.parentElement;
+        if (parent && parent.classList.contains('slot')) {
+          dragData.from = 'slot';
+          dragData.fromSlotIndex = Number(parent.dataset.index);
+        } else {
+          dragData.from = 'bank';
+          dragData.fromSlotIndex = -1;
+        }
+        dragData.el = tile;
+        tile.classList.add('dragging');
+      }, { passive: false });
+
+      document.addEventListener('touchmove', (e) => {
+        if (!touchData.active) return;
+        e.preventDefault();
+        const t = e.touches[0];
+
+        const dx = t.clientX - touchData.startX;
+        const dy = t.clientY - touchData.startY;
+        touchData.active.style.transform = `translate(${dx}px, ${dy}px)`;
+        touchData.active.style.pointerEvents = 'none';
+
+        const hovered = document.elementFromPoint(t.clientX, t.clientY);
+        removeDropHover();
+        if (hovered) {
+          const container = hovered.closest('.slot, .bank');
+          if (container) container.classList.add('drophover');
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchend', (e) => {
+        if (!touchData.active) return;
+        const t = e.changedTouches[0];
+        const droppedOn = document.elementFromPoint(t.clientX, t.clientY);
+
+        const tile = touchData.active;
+        tile.style.transform = '';
+        tile.style.pointerEvents = '';
+        tile.classList.remove('dragging');
+        removeDropHover();
+
+        const slot = droppedOn ? droppedOn.closest('.slot') : null;
+        const bank = droppedOn ? droppedOn.closest('.bank') : null;
+
+        if (slot) {
+          onDropSlot({ preventDefault: () => { }, currentTarget: slot });
+        } else if (bank) {
+          onDropBank({ preventDefault: () => { }, currentTarget: bank });
+        }
+
+        touchData.active = null;
+        dragData.el = null;
+      });
     })();
   </script>
 </body>
