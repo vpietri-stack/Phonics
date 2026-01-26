@@ -248,9 +248,9 @@
 <body>
   <header>
     <button class="primary" id="repeatBtn">🔁 再听一遍</button>
-    <div id="timer">60</div>
+    <div id="timer">0s</div>
     <div class="spacer"></div>
-    <div>得分：<span id="score">0</span> ｜ 连续：<span id="streak">1</span></div>
+    <div>进度：<span id="progress">0/10</span></div>
   </header>
 
   <main>
@@ -279,7 +279,7 @@
   <div class="overlay" id="overlay" style="display:none;">
     <div class="card">
       <h2>准备好开始了吗？</h2>
-      <p>在 60 秒内尽量多地拼出正确句子。</p>
+      <p>完成 10 个句子，看看你能多快！</p>
       <button class="primary" id="startBtn">开始 ▶️</button>
     </div>
   </div>
@@ -287,9 +287,10 @@
   <!-- End overlay -->
   <div class="overlay" id="endScreen" style="display:none;">
     <div class="card">
-      <h2>做得好！</h2>
-      <p>你的得分：<span id="finalScore"></span></p>
-      <button class="primary" id="retryBtn">再试一次？</button>
+      <h2>做得好！🎉</h2>
+      <p>你完成了 10 个句子！<br>用时：<span id="finalTime"
+          style="font-weight:bold; color:var(--primary); font-size:1.4em;"></span></p>
+      <button class="primary" id="retryBtn">再来一次？</button>
     </div>
   </div>
 
@@ -300,9 +301,10 @@
 
       // State
       let sentences = [];
-      let order = [], round = 0, score = 0, timeLeft = 60, timerInterval = null;
+      let order = [], round = 0, startTime = 0, timerInterval = null, completedCount = 0;
       let current = "", words = [], slots = [], bankOrder = [];
-      let gameActive = false, streak = 1; // combo base starts at 1
+      let gameActive = false;
+      const GOAL = 10;
 
       // Audio
       let audioCtx = null;
@@ -361,9 +363,8 @@
       const bankEl = document.getElementById('bank');
       const statusMsg = document.getElementById('statusMsg');
       const timerEl = document.getElementById('timer');
-      const scoreEl = document.getElementById('score');
-      const finalScore = document.getElementById('finalScore');
-      const streakEl = document.getElementById('streak');
+      const progressEl = document.getElementById('progress');
+      const finalTimeEl = document.getElementById('finalTime');
 
       // Utils
       function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } return a; }
@@ -374,7 +375,8 @@
       function startGame() {
         ensureAudioCtx();
         order = shuffle([...sentences]);
-        round = 0; score = 0; timeLeft = 60; streak = 1; gameActive = true;
+        round = 0; completedCount = 0; gameActive = true;
+        startTime = Date.now();
         statusMsg.classList.remove('ok', 'no');
         updateHUD();
         renderRound();
@@ -586,51 +588,67 @@
         slots[idx] = null;
       }
 
-      // Completion check + combo scoring
+      // Completion check
       function checkIfComplete() {
         if (!slots.every(s => s !== null)) return;
         const attempt = slots.join(' ');
         const target = sentenceToWords(current).join(' ');
+
         if (attempt.toLowerCase() === target.toLowerCase()) {
-          const gained = 10 * streak; // score with current streak
-          score += gained;
-          statusMsg.textContent = `✅ 正确（连对 ${streak}），+${gained} 分：${current}`;
+          // Correct!
+          completedCount++;
+          statusMsg.textContent = `✅ 正确！`;
           statusMsg.classList.remove('no'); statusMsg.classList.add('ok');
           playChime();
-          streak += 1; // increase streak after scoring
-          round++;
-          if (round >= order.length) { order = shuffle([...sentences]); round = 0; }
-          setTimeout(() => { if (gameActive) { renderRound(); speak(current); } }, 450);
+
+          if (completedCount >= GOAL) {
+            endGame();
+          } else {
+            round++;
+            // Wrap around if we run out of sentences (though with 10 goal and ~30 sentences, unlikely)
+            if (round >= order.length) { order = shuffle([...sentences]); round = 0; }
+            setTimeout(() => { if (gameActive) { renderRound(); speak(current); } }, 1000);
+          }
         } else {
-          statusMsg.textContent = '❌ 不对，连续已重置为 1，再试一次。';
+          // Incorrect - just feedback, reset tiles? No, user requested "don't go next until correct".
+          // So we just say incorrect and let them fix it.
+          statusMsg.textContent = '❌ 不对，请检查顺序。';
           statusMsg.classList.remove('ok'); statusMsg.classList.add('no');
           playBuzz();
-          streak = 1; // reset streak on mistake
-          setTimeout(() => { if (gameActive) { renderRound(); speak(current); } }, 450);
+          // Optionally reset? The prompt says "don't let the student go to the next sentence until... correct".
+          // Usually better to let them adjust tiles rather than full reset.
+          // But to be helpful, maybe we can reject only the wrong ones? 
+          // For simple mechanics: just play buzz and keep tiles as is.
         }
         updateHUD();
       }
 
       // HUD + timer
       function updateHUD() {
-        scoreEl.textContent = score;
-        timerEl.textContent = timeLeft;
-        streakEl.textContent = streak;
+        progressEl.textContent = `${completedCount}/${GOAL}`;
       }
+
+      function formatTime(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        return `${m}分${s}秒`;
+      }
+
       function startTimer() {
         clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-          timeLeft--;
-          updateHUD();
-          if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            endGame();
-          }
+          if (!gameActive) return;
+          const elapsed = Date.now() - startTime;
+          timerEl.textContent = Math.floor(elapsed / 1000) + 's';
         }, 1000);
       }
+
       function endGame() {
         gameActive = false;
-        finalScore.textContent = score;
+        clearInterval(timerInterval);
+        const totalTime = formatTime(Date.now() - startTime);
+        finalTimeEl.textContent = totalTime;
         endScreen.style.display = 'flex';
       }
 
