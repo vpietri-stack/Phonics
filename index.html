@@ -333,7 +333,7 @@
       }
 
       function speak(text) {
-        const youdaoUrl = `https://dict.youdao.com/dictvoice?audio=${text}&type=1`;
+        const youdaoUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
         const audio = new Audio(youdaoUrl);
         audio.onerror = () => fallbackSpeech(text);
         const p = audio.play();
