@@ -4,7 +4,6 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="referrer" content="no-referrer" />
   <title>听一听并拼句子 — 限时挑战 (英音 TTS) — v1.0</title>
   <style>
     :root {
@@ -321,10 +320,16 @@
 
       // Audio
       let audioCtx = null;
+      const audioEl = new Audio();
+      audioEl.volume = 0.95;
+
       function ensureAudioCtx() {
         if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
         if (audioCtx.state === 'suspended') { audioCtx.resume().catch(() => { }); }
+        // Also "unlock" the persistent audio element
+        audioEl.play().then(() => { audioEl.pause(); }).catch(() => { });
       }
+
       function playChime() {
         if (!audioCtx) return;
         const now = audioCtx.currentTime;
@@ -336,6 +341,7 @@
         const o1 = audioCtx.createOscillator(); o1.type = 'sine'; o1.frequency.setValueAtTime(880, now); o1.connect(g); o1.start(now); o1.stop(now + .18);
         const o2 = audioCtx.createOscillator(); o2.type = 'sine'; o2.frequency.setValueAtTime(1319, now + .1); o2.connect(g); o2.start(now + .1); o2.stop(now + .32);
       }
+
       function playBuzz() {
         if (!audioCtx) return;
         const now = audioCtx.currentTime;
@@ -348,11 +354,13 @@
       }
 
       function speak(text) {
-        const youdaoUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
-        const audio = new Audio(youdaoUrl);
-        audio.volume = 0.95;
-        audio.onerror = () => fallbackSpeech(text);
-        const p = audio.play();
+        // Exact original Baidu URL and parameters
+        const url = `https://fanyi.baidu.com/gettts?lan=uk&text=${encodeURIComponent(text)}&spd=3&source=web`;
+        audioEl.src = url;
+
+        audioEl.onerror = () => fallbackSpeech(text);
+        audioEl.currentTime = 0;
+        const p = audioEl.play();
         if (p !== undefined) p.catch(() => fallbackSpeech(text));
       }
 
@@ -362,7 +370,6 @@
           const u = new SpeechSynthesisUtterance(text);
           u.rate = 0.9;
           const voices = window.speechSynthesis.getVoices();
-          // Try to find a UK voice
           const v = voices.find(val => val.lang.includes('GB') || val.lang.includes('UK'));
           if (v) u.voice = v;
           window.speechSynthesis.speak(u);
