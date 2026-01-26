@@ -1,524 +1,671 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>听一听并拼句子 — 限时挑战 (英音 TTS) — v1.0</title>
-<style>
-  :root{
-    --bg: #FAF7F0; --ink: #3F2D23; --muted-ink:#5A463A;
-    --panel:#FFF6E8; --card:#FFFDFC; --outline:#D9C3A1; --outline-strong:#BFA585;
-    --slot-bg:#FFFFFF; --tile-bg:#FFFFFF; --tile-border:#CDB89E;
-    --accent:#81B29A; --accent-ink:#1F3D33;
-    --primary:#E07A5F; --primary-hover:#D5694E; --primary-ink:#FFFFFF;
-    --timer:#B7791F; --success:#2F855A; --danger:#B83227;
-    --shadow: 0 8px 20px rgba(63,45,35,.12);
-  }
-  :root{
-    --font: "Nunito","Baloo 2","Fredoka","Trebuchet MS","Segoe UI","PingFang SC",
-            "Microsoft YaHei",system-ui,-apple-system,Arial,sans-serif;
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>听一听并拼句子 — 限时挑战 (英音 TTS) — v1.0</title>
+  <style>
+    :root {
+      --bg: #FAF7F0;
+      --ink: #3F2D23;
+      --muted-ink: #5A463A;
+      --panel: #FFF6E8;
+      --card: #FFFDFC;
+      --outline: #D9C3A1;
+      --outline-strong: #BFA585;
+      --slot-bg: #FFFFFF;
+      --tile-bg: #FFFFFF;
+      --tile-border: #CDB89E;
+      --accent: #81B29A;
+      --accent-ink: #1F3D33;
+      --primary: #E07A5F;
+      --primary-hover: #D5694E;
+      --primary-ink: #FFFFFF;
+      --timer: #B7791F;
+      --success: #2F855A;
+      --danger: #B83227;
+      --shadow: 0 8px 20px rgba(63, 45, 35, .12);
+    }
 
-  *{box-sizing:border-box}
-  body{
-    margin:0; font-family:var(--font);
-    background:var(--bg); color:var(--ink);
-    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-  }
+    :root {
+      --font: "Comic Sans MS", "Chalkboard SE", "KaiTi", "楷体", "Nunito", "Baloo 2", sans-serif;
+    }
 
-  header{
-    position:sticky; top:0; z-index:10;
-    background:var(--panel);
-    border-bottom:1px solid var(--outline);
-    padding:.6rem .75rem;
-    display:flex; align-items:center; gap:.6rem;
-  }
+    * {
+      box-sizing: border-box
+    }
 
-  button{
-    cursor:pointer; border:none; border-radius:999px;
-    padding:.5rem .9rem; font-weight:800; letter-spacing:.2px;
-    box-shadow:var(--shadow); transition:transform .04s ease, background .15s ease, box-shadow .15s ease;
-  }
-  button:active{ transform:translateY(1px); box-shadow:0 4px 10px rgba(63,45,35,.12); }
-  .primary{ background:var(--primary); color:var(--primary-ink); }
-  .primary:hover{ background:var(--primary-hover); }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
 
-  main{ padding:1rem; max-width:860px; margin:auto; }
-  p{ margin:.25rem 0 1rem 0; color:var(--muted-ink); }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--panel);
+      border-bottom: 1px solid var(--outline);
+      padding: .6rem .75rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
 
-  .target,.bank{
-    display:flex; flex-wrap:wrap; gap:.6rem;
-    padding:.7rem; border:2px dashed var(--outline);
-    border-radius:12px; min-height:70px; background:var(--card);
-  }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 999px;
+      padding: .5rem .9rem;
+      font-weight: 800;
+      letter-spacing: .2px;
+      box-shadow: var(--shadow);
+      transition: transform .04s ease, background .15s ease, box-shadow .15s ease;
+    }
 
-  .slot{
-    min-width:64px; min-height:46px; padding:.25rem .4rem;
-    border:2px dashed var(--outline-strong);
-    border-radius:10px; display:flex; align-items:center; justify-content:center;
-    background:var(--slot-bg); color:var(--ink);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
-  }
-  .slot.filled{ border-style:solid; }
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 10px rgba(63, 45, 35, .12);
+    }
 
-  .tile{
-    background:var(--tile-bg);
-    border:2px solid var(--tile-border);
-    padding:.4rem .7rem; border-radius:12px;
-    color:var(--ink); user-select:none; font-weight:800;
-    box-shadow:var(--shadow);
-    transition:transform .06s ease, box-shadow .12s ease, border-color .12s ease;
-  }
-  .tile:hover{ transform:translateY(-1px); box-shadow:0 10px 24px rgba(63,45,35,.16); }
-  .tile.dragging{ opacity:.7; }
+    .primary {
+      background: var(--primary);
+      color: var(--primary-ink);
+    }
 
-  .status{ margin-top:1rem; font-weight:800; color:var(--muted-ink); }
-  .status.ok{ color:var(--success); }
-  .status.no{ color:var(--danger); }
+    .primary:hover {
+      background: var(--primary-hover);
+    }
 
-  .drophover{ outline:3px dashed var(--accent); outline-offset:3px; }
+    main {
+      padding: 1rem;
+      max-width: 860px;
+      margin: auto;
+    }
 
-  #timer{
-    margin-left:.5rem; font-weight:900; color:var(--timer);
-    background:#FFF1C4; border:1px solid #F2D086; border-radius:999px;
-    padding:.2rem .6rem;
-  }
-  .spacer{ flex:1; }
+    p {
+      margin: .25rem 0 1rem 0;
+      color: var(--muted-ink);
+    }
 
-  h3{
-    margin:.8rem 0 .4rem 0; font-size:1rem; letter-spacing:.3px; color:var(--muted-ink);
-  }
+    .target,
+    .bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+      padding: .7rem;
+      border: 2px dashed var(--outline);
+      border-radius: 12px;
+      min-height: 70px;
+      background: var(--card);
+    }
 
-  .overlay{
-    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-    background:rgba(63,45,35,.25); z-index:100; backdrop-filter:saturate(120%) blur(2px);
-  }
-  .overlay .card{
-    background:var(--card); padding:1.2rem 1rem; border-radius:16px; text-align:center;
-    max-width:420px; width:min(94%, 420px);
-    border:1px solid var(--outline); box-shadow:var(--shadow);
-  }
-  .overlay .card h2{ margin:.2rem 0 .5rem 0; }
-  .overlay .card p{ margin:.2rem 0 .9rem 0; }
+    .slot {
+      min-width: 64px;
+      min-height: 46px;
+      padding: .25rem .4rem;
+      border: 2px dashed var(--outline-strong);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--slot-bg);
+      color: var(--ink);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6);
+    }
 
-  :focus-visible{ outline:3px solid var(--accent); outline-offset:3px; border-radius:12px; }
+    .slot.filled {
+      border-style: solid;
+    }
 
-  @media (max-width:480px){
-    button{ padding:.55rem .95rem; }
-    .slot{ min-width:56px; min-height:44px; }
-  }
-</style>
+    .tile {
+      background: var(--tile-bg);
+      border: 2px solid var(--tile-border);
+      padding: .4rem .7rem;
+      border-radius: 12px;
+      color: var(--ink);
+      user-select: none;
+      font-weight: 800;
+      box-shadow: var(--shadow);
+      transition: transform .06s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+
+    .tile:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(63, 45, 35, .16);
+    }
+
+    .tile.dragging {
+      opacity: .7;
+    }
+
+    .status {
+      margin-top: 1rem;
+      font-weight: 800;
+      color: var(--muted-ink);
+    }
+
+    .status.ok {
+      color: var(--success);
+    }
+
+    .status.no {
+      color: var(--danger);
+    }
+
+    .drophover {
+      outline: 3px dashed var(--accent);
+      outline-offset: 3px;
+    }
+
+    #timer {
+      margin-left: .5rem;
+      font-weight: 900;
+      color: var(--timer);
+      background: #FFF1C4;
+      border: 1px solid #F2D086;
+      border-radius: 999px;
+      padding: .2rem .6rem;
+    }
+
+    .spacer {
+      flex: 1;
+    }
+
+    h3 {
+      margin: .8rem 0 .4rem 0;
+      font-size: 1rem;
+      letter-spacing: .3px;
+      color: var(--muted-ink);
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(63, 45, 35, .25);
+      z-index: 100;
+      backdrop-filter: saturate(120%) blur(2px);
+    }
+
+    .overlay .card {
+      background: var(--card);
+      padding: 1.2rem 1rem;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 420px;
+      width: min(94%, 420px);
+      border: 1px solid var(--outline);
+      box-shadow: var(--shadow);
+    }
+
+    .overlay .card h2 {
+      margin: .2rem 0 .5rem 0;
+    }
+
+    .overlay .card p {
+      margin: .2rem 0 .9rem 0;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 12px;
+    }
+
+    @media (max-width:480px) {
+      button {
+        padding: .55rem .95rem;
+      }
+
+      .slot {
+        min-width: 48px;
+        min-height: 38px;
+        padding: 0.1rem 0.2rem;
+        font-size: 0.9rem;
+      }
+
+      .tile {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      main {
+        padding: 0.5rem;
+      }
+    }
+  </style>
+  <script src="js/data.js"></script>
 </head>
+
 <body>
-<header>
-  <button class="primary" id="repeatBtn">🔁 再听一遍</button>
-  <div id="timer">60</div>
-  <div class="spacer"></div>
-  <div>得分：<span id="score">0</span> ｜ 连续：<span id="streak">1</span></div>
-</header>
+  <header>
+    <button class="primary" id="repeatBtn">🔁 再听一遍</button>
+    <div id="timer">60</div>
+    <div class="spacer"></div>
+    <div>得分：<span id="score">0</span> ｜ 连续：<span id="streak">1</span></div>
+  </header>
 
-<main>
-  <p>👂 听一听，然后拖动或点击单词，按正确顺序排列句子。</p>
+  <main>
+    <p>👂 听一听，然后拖动或点击单词，按正确顺序排列句子。</p>
 
-  <div class="target" id="target" aria-label="句子槽位"></div>
+    <div class="target" id="target" aria-label="句子槽位"></div>
 
-  <h3>单词库</h3>
-  <div class="bank" id="bank" aria-label="可用单词"></div>
+    <h3>单词库</h3>
+    <div class="bank" id="bank" aria-label="可用单词"></div>
 
-  <div class="status" id="statusMsg">点击“再听一遍”来听句子。</div>
-</main>
+    <div class="status" id="statusMsg">点击“再听一遍”来听句子。</div>
+  </main>
 
-<!-- Start overlay -->
-<div class="overlay" id="overlay">
-  <div class="card">
-    <h2>准备好开始了吗？</h2>
-    <p>在 60 秒内尽量多地拼出正确句子。</p>
-    <button class="primary" id="startBtn">开始 ▶️</button>
+  <!-- Class Selector Overlay -->
+  <div class="overlay" id="classSelector">
+    <div class="card">
+      <h2>请选择课程</h2>
+      <p>选择你要练习的班级内容：</p>
+      <div id="classButtons" style="display:flex; flex-direction:column; gap:0.8rem; margin-bottom:1rem;">
+        <!-- Buttons injected here -->
+      </div>
+    </div>
   </div>
-</div>
 
-<!-- End overlay -->
-<div class="overlay" id="endScreen" style="display:none;">
-  <div class="card">
-    <h2>做得好！</h2>
-    <p>你的得分：<span id="finalScore"></span></p>
-    <button class="primary" id="retryBtn">再试一次？</button>
+  <!-- Start overlay -->
+  <div class="overlay" id="overlay" style="display:none;">
+    <div class="card">
+      <h2>准备好开始了吗？</h2>
+      <p>在 60 秒内尽量多地拼出正确句子。</p>
+      <button class="primary" id="startBtn">开始 ▶️</button>
+    </div>
   </div>
-</div>
 
-<script>
-/* Version: 1.0 (combo scoring + CN UI + worksheet theme) */
-(()=>{
-  // TTS: Baidu basic TTS (British English)
-  const TTS_BASE='https://fanyi.baidu.com/gettts';
-  const TTS_LANG='uk';
-  const TTS_SPD=3;
-  const TTS_SOURCE='web';
+  <!-- End overlay -->
+  <div class="overlay" id="endScreen" style="display:none;">
+    <div class="card">
+      <h2>做得好！</h2>
+      <p>你的得分：<span id="finalScore"></span></p>
+      <button class="primary" id="retryBtn">再试一次？</button>
+    </div>
+  </div>
 
-  // Sentences stay in English (to match materials)
-  const SENTENCES=[
-"The man has a cane.",
-"The cat has a name.",
-"The lad has a cake.",
-"The dad has a rake.",
-"The bag has tape.",
-"The rat has a cage.",
-"The cat is on the gate.",
-"The map is on the case.",
-"The cap is on a rake.",
-"The bag is on the gate.",
-"The fan is on a base.",
-"The bat is on the gate.",
-"A rat is on the cake.",
-"A cap is on the cane.",
-"A map is on the gate.",
-"A cat is on the lane.",
-"A bag is on the base.",
-"The bat is in the cave.",
-"The rat is in the cage.",
-"The jam is in the vase.",
-"The man is in the lane.",
-"The map is in a case.",
-"The pan is in the lake.",
-"The lad is in the cave.",
-"A cat is in the lane.",
-"A rat is in the vase.",
-"A fan is in the cave.",
-"A bat is in the cage.",
-"A cap is in the lake."
-  ];
+  <script>
+    /* Version: 1.0 (combo scoring + CN UI + worksheet theme) */
+    (() => {
+      // TTS: Youdao (Type 1 = UK)
+      const TTS_BASE = 'https://dict.youdao.com/dictvoice';
 
-  // State
-  let order=[],round=0,score=0,timeLeft=60,timerInterval=null;
-  let current="",words=[],slots=[],bankOrder=[];
-  let gameActive=false, streak=1; // combo base starts at 1
+      // State
+      let sentences = [];
+      let order = [], round = 0, score = 0, timeLeft = 60, timerInterval = null;
+      let current = "", words = [], slots = [], bankOrder = [];
+      let gameActive = false, streak = 1; // combo base starts at 1
 
-  // Audio
-  const audioEl=new Audio(); audioEl.volume=0.95;
-  let audioCtx=null;
-  function ensureAudioCtx(){
-    if(!audioCtx){ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }
-    if(audioCtx.state==='suspended'){ audioCtx.resume().catch(()=>{}); }
-  }
-  function playChime(){
-    if(!audioCtx) return;
-    const now=audioCtx.currentTime;
-    const g=audioCtx.createGain();
-    g.gain.setValueAtTime(.0001,now);
-    g.gain.exponentialRampToValueAtTime(.18,now+.01);
-    g.gain.exponentialRampToValueAtTime(.0001,now+.35);
-    g.connect(audioCtx.destination);
-    const o1=audioCtx.createOscillator(); o1.type='sine'; o1.frequency.setValueAtTime(880,now); o1.connect(g); o1.start(now); o1.stop(now+.18);
-    const o2=audioCtx.createOscillator(); o2.type='sine'; o2.frequency.setValueAtTime(1319,now+.1); o2.connect(g); o2.start(now+.1); o2.stop(now+.32);
-  }
-  function playBuzz(){
-    if(!audioCtx) return;
-    const now=audioCtx.currentTime;
-    const g=audioCtx.createGain();
-    g.gain.setValueAtTime(.0001,now);
-    g.gain.exponentialRampToValueAtTime(.22,now+.01);
-    g.gain.exponentialRampToValueAtTime(.0001,now+.25);
-    g.connect(audioCtx.destination);
-    const o=audioCtx.createOscillator(); o.type='square'; o.frequency.setValueAtTime(140,now); o.connect(g); o.start(now); o.stop(now+.25);
-  }
-  function ttsUrl(text){
-    return `${TTS_BASE}?lan=${encodeURIComponent(TTS_LANG)}&text=${encodeURIComponent(text)}&spd=${TTS_SPD}&source=${TTS_SOURCE}`;
-  }
-  function speak(text){
-    audioEl.src=ttsUrl(text);
-    audioEl.currentTime=0;
-    audioEl.play().catch(()=>{});
-  }
-
-  // DOM
-  const overlay=document.getElementById('overlay');
-  const endScreen=document.getElementById('endScreen');
-  const startBtn=document.getElementById('startBtn');
-  const repeatBtn=document.getElementById('repeatBtn');
-  const retryBtn=document.getElementById('retryBtn');
-  const targetEl=document.getElementById('target');
-  const bankEl=document.getElementById('bank');
-  const statusMsg=document.getElementById('statusMsg');
-  const timerEl=document.getElementById('timer');
-  const scoreEl=document.getElementById('score');
-  const finalScore=document.getElementById('finalScore');
-  const streakEl=document.getElementById('streak');
-
-  // Utils
-  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-  function sentenceToWords(s){ return s.replace(/\.$/,'').split(' '); }
-  function clear(el){ while(el.firstChild) el.removeChild(el.firstChild); }
-
-  // Start/restart
-  function startGame(){
-    ensureAudioCtx();
-    order=shuffle([...SENTENCES]);
-    round=0; score=0; timeLeft=60; streak=1; gameActive=true;
-    statusMsg.classList.remove('ok','no');
-    updateHUD();
-    renderRound();
-    speak(current);
-    startTimer();
-  }
-
-  // Build round
-  function renderRound(){
-    current=order[round];
-    words=sentenceToWords(current);
-    bankOrder=shuffle([...words]);
-    slots=Array(words.length).fill(null);
-    clear(targetEl); clear(bankEl);
-
-    // Slots
-    words.forEach((_,i)=>{
-      const slot=document.createElement('div');
-      slot.className='slot';
-      slot.dataset.index=i;
-      slot.addEventListener('click',()=>returnTile(slot));
-      slot.addEventListener('dragover',onDragOver);
-      slot.addEventListener('dragleave',onDragLeave);
-      slot.addEventListener('drop',onDropSlot);
-      targetEl.appendChild(slot);
-    });
-
-    // Bank (drag targets)
-    bankOrder.forEach(w=> bankEl.appendChild(makeTile(w)) );
-    bankEl.addEventListener('dragover',onDragOver);
-    bankEl.addEventListener('dragleave',onDragLeave);
-    bankEl.addEventListener('drop',onDropBank);
-
-    statusMsg.textContent='请按听到的顺序排列这些单词。';
-    statusMsg.classList.remove('ok','no');
-    updateHUD();
-  }
-
-  // Tiles
-  function makeTile(word){
-    const t=document.createElement('div');
-    t.className='tile';
-    t.textContent=word;
-    t.draggable=true;
-    t.addEventListener('click',()=>placeTile(t));
-    t.addEventListener('dragstart',onDragStart);
-    t.addEventListener('dragend',onDragEnd);
-    return t;
-  }
-
-  // Click to place into first empty slot
-  function placeTile(tile){
-    if(!gameActive) return;
-    const empty=findFirstEmptySlot();
-    if(!empty) return;
-    moveTileToSlot(tile, empty);
-    checkIfComplete();
-  }
-
-  function returnTile(slot){
-    if(!gameActive) return;
-    if(!slot.classList.contains('filled')) return;
-    const tile=slot.querySelector('.tile');
-    if(tile) moveTileToBankFromSlot(tile, slot);
-  }
-
-  function findFirstEmptySlot(){
-    return [...targetEl.children].find(s=>!s.classList.contains('filled'));
-  }
-
-  // Drag & drop
-  const dragData={ el:null, from:'', fromSlotIndex:-1 };
-  function onDragStart(e){
-    if(!gameActive) return;
-    const tile=e.currentTarget;
-    dragData.el=tile;
-    const parent=tile.parentElement;
-    if(parent && parent.classList.contains('slot')){
-      dragData.from='slot';
-      dragData.fromSlotIndex=Number(parent.dataset.index);
-    }else{
-      dragData.from='bank';
-      dragData.fromSlotIndex=-1;
-    }
-    tile.classList.add('dragging');
-    e.dataTransfer.setData('text/plain', tile.textContent);
-    e.dataTransfer.effectAllowed='move';
-  }
-  function onDragEnd(e){
-    const tile=e.currentTarget;
-    tile.classList.remove('dragging');
-    dragData.el=null; dragData.from=''; dragData.fromSlotIndex=-1;
-    removeDropHover();
-  }
-  function onDragOver(e){
-    e.preventDefault();
-    e.dataTransfer.dropEffect='move';
-    e.currentTarget.classList.add('drophover');
-  }
-  function onDragLeave(e){ e.currentTarget.classList.remove('drophover'); }
-  function removeDropHover(){ document.querySelectorAll('.drophover').forEach(n=>n.classList.remove('drophover')); }
-
-  function onDropSlot(e){
-    e.preventDefault();
-    const slot = e.currentTarget;
-    slot.classList.remove('drophover');
-    const tile = dragData.el;
-    if(!tile || !gameActive) return;
-
-    const targetIndex = Number(slot.dataset.index);
-    if(dragData.from==='slot' && dragData.fromSlotIndex===targetIndex) return;
-
-    if(!slot.classList.contains('filled')){
-      if(dragData.from==='slot'){
-        const fromSlot = targetEl.children[dragData.fromSlotIndex];
-        moveTileBetweenSlots(fromSlot, slot);
-      }else{
-        moveTileToSlot(tile, slot);
+      // Audio
+      let audioCtx = null;
+      function ensureAudioCtx() {
+        if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        if (audioCtx.state === 'suspended') { audioCtx.resume().catch(() => { }); }
       }
-    }else{
-      if(dragData.from==='slot'){
-        const fromSlot = targetEl.children[dragData.fromSlotIndex];
-        swapSlots(fromSlot, slot);
-      }else{
-        const occupiedTile = slot.querySelector('.tile');
-        if(occupiedTile) bankEl.appendChild(occupiedTile);
-        moveTileToSlot(tile, slot);
+      function playChime() {
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const g = audioCtx.createGain();
+        g.gain.setValueAtTime(.0001, now);
+        g.gain.exponentialRampToValueAtTime(.18, now + .01);
+        g.gain.exponentialRampToValueAtTime(.0001, now + .35);
+        g.connect(audioCtx.destination);
+        const o1 = audioCtx.createOscillator(); o1.type = 'sine'; o1.frequency.setValueAtTime(880, now); o1.connect(g); o1.start(now); o1.stop(now + .18);
+        const o2 = audioCtx.createOscillator(); o2.type = 'sine'; o2.frequency.setValueAtTime(1319, now + .1); o2.connect(g); o2.start(now + .1); o2.stop(now + .32);
       }
-    }
-    checkIfComplete();
-  }
+      function playBuzz() {
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const g = audioCtx.createGain();
+        g.gain.setValueAtTime(.0001, now);
+        g.gain.exponentialRampToValueAtTime(.22, now + .01);
+        g.gain.exponentialRampToValueAtTime(.0001, now + .25);
+        g.connect(audioCtx.destination);
+        const o = audioCtx.createOscillator(); o.type = 'square'; o.frequency.setValueAtTime(140, now); o.connect(g); o.start(now); o.stop(now + .25);
+      }
 
-  function onDropBank(e){
-    e.preventDefault();
-    bankEl.classList.remove('drophover');
-    const tile = dragData.el;
-    if(!tile || !gameActive) return;
-    if(dragData.from==='slot'){
-      const fromSlot = targetEl.children[dragData.fromSlotIndex];
-      moveTileToBankFromSlot(tile, fromSlot);
-    }
-  }
+      function speak(text) {
+        const youdaoUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
+        const audio = new Audio(youdaoUrl);
+        audio.volume = 0.95;
+        audio.onerror = () => fallbackSpeech(text);
+        const p = audio.play();
+        if (p !== undefined) p.catch(() => fallbackSpeech(text));
+      }
 
-  // Move helpers
-  function moveTileToSlot(tile, slot){
-    const oldParent = tile.parentElement;
-    if(oldParent && oldParent.classList.contains('slot')){
-      const oldIndex = Number(oldParent.dataset.index);
-      oldParent.classList.remove('filled');
-      oldParent.textContent='';
-      slots[oldIndex]=null;
-    }
-    slot.textContent='';
-    slot.appendChild(tile);
-    slot.classList.add('filled');
-    slots[Number(slot.dataset.index)] = tile.textContent;
-  }
+      function fallbackSpeech(text) {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(text);
+          u.rate = 0.9;
+          const voices = window.speechSynthesis.getVoices();
+          // Try to find a UK voice
+          const v = voices.find(val => val.lang.includes('GB') || val.lang.includes('UK'));
+          if (v) u.voice = v;
+          window.speechSynthesis.speak(u);
+        }
+      }
 
-  function moveTileBetweenSlots(fromSlot, toSlot){
-    const tile = fromSlot.querySelector('.tile');
-    if(!tile) return;
-    const fromIndex = Number(fromSlot.dataset.index);
-    const toIndex = Number(toSlot.dataset.index);
+      // DOM
+      const overlay = document.getElementById('overlay');
+      const endScreen = document.getElementById('endScreen');
+      const startBtn = document.getElementById('startBtn');
+      const repeatBtn = document.getElementById('repeatBtn');
+      const retryBtn = document.getElementById('retryBtn');
+      const targetEl = document.getElementById('target');
+      const bankEl = document.getElementById('bank');
+      const statusMsg = document.getElementById('statusMsg');
+      const timerEl = document.getElementById('timer');
+      const scoreEl = document.getElementById('score');
+      const finalScore = document.getElementById('finalScore');
+      const streakEl = document.getElementById('streak');
 
-    const other = toSlot.querySelector('.tile');
-    if(other){
-      fromSlot.textContent='';
-      fromSlot.appendChild(other);
-      fromSlot.classList.add('filled');
-      slots[fromIndex] = other.textContent;
+      // Utils
+      function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } return a; }
+      function sentenceToWords(s) { return s.replace(/\.$/, '').split(' '); }
+      function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
 
-      toSlot.textContent='';
-      toSlot.appendChild(tile);
-      toSlot.classList.add('filled');
-      slots[toIndex] = tile.textContent;
-    }else{
-      toSlot.textContent='';
-      toSlot.appendChild(tile);
-      toSlot.classList.add('filled');
-      fromSlot.textContent='';
-      fromSlot.classList.remove('filled');
-      slots[toIndex] = tile.textContent;
-      slots[fromIndex] = null;
-    }
-  }
+      // Start/restart
+      function startGame() {
+        ensureAudioCtx();
+        order = shuffle([...sentences]);
+        round = 0; score = 0; timeLeft = 60; streak = 1; gameActive = true;
+        statusMsg.classList.remove('ok', 'no');
+        updateHUD();
+        renderRound();
+        speak(current);
+        startTimer();
+      }
 
-  function swapSlots(slotA, slotB){
-    const tileA = slotA.querySelector('.tile');
-    const tileB = slotB.querySelector('.tile');
-    const idxA = Number(slotA.dataset.index);
-    const idxB = Number(slotB.dataset.index);
-    if(!tileA || !tileB) return;
+      // Build round
+      function renderRound() {
+        current = order[round];
+        words = sentenceToWords(current);
+        bankOrder = shuffle([...words]);
+        slots = Array(words.length).fill(null);
+        clear(targetEl); clear(bankEl);
 
-    slotA.textContent='';
-    slotB.textContent='';
-    slotA.appendChild(tileB);
-    slotB.appendChild(tileA);
-    slotA.classList.add('filled');
-    slotB.classList.add('filled');
-    slots[idxA] = tileB.textContent;
-    slots[idxB] = tileA.textContent;
-  }
+        // Slots
+        words.forEach((_, i) => {
+          const slot = document.createElement('div');
+          slot.className = 'slot';
+          slot.dataset.index = i;
+          slot.addEventListener('click', () => returnTile(slot));
+          slot.addEventListener('dragover', onDragOver);
+          slot.addEventListener('dragleave', onDragLeave);
+          slot.addEventListener('drop', onDropSlot);
+          targetEl.appendChild(slot);
+        });
 
-  function moveTileToBankFromSlot(tile, slot){
-    const idx = Number(slot.dataset.index);
-    bankEl.appendChild(tile);
-    slot.textContent='';
-    slot.classList.remove('filled');
-    slots[idx]=null;
-  }
+        // Bank (drag targets)
+        bankOrder.forEach(w => bankEl.appendChild(makeTile(w)));
+        bankEl.addEventListener('dragover', onDragOver);
+        bankEl.addEventListener('dragleave', onDragLeave);
+        bankEl.addEventListener('drop', onDropBank);
 
-  // Completion check + combo scoring
-  function checkIfComplete(){
-    if(!slots.every(s=>s!==null)) return;
-    const attempt=slots.join(' ');
-    const target=sentenceToWords(current).join(' ');
-    if(attempt.toLowerCase()===target.toLowerCase()){
-      const gained = 10 * streak; // score with current streak
-      score += gained;
-      statusMsg.textContent = `✅ 正确（连对 ${streak}），+${gained} 分：${current}`;
-      statusMsg.classList.remove('no'); statusMsg.classList.add('ok');
-      playChime();
-      streak += 1; // increase streak after scoring
-      round++;
-      if(round>=order.length){ order=shuffle([...SENTENCES]); round=0; }
-      setTimeout(()=>{ if(gameActive){ renderRound(); speak(current); } }, 450);
-    }else{
-      statusMsg.textContent='❌ 不对，连续已重置为 1，再试一次。';
-      statusMsg.classList.remove('ok'); statusMsg.classList.add('no');
-      playBuzz();
-      streak = 1; // reset streak on mistake
-      setTimeout(()=>{ if(gameActive){ renderRound(); speak(current); } }, 450);
-    }
-    updateHUD();
-  }
+        statusMsg.textContent = '请按听到的顺序排列这些单词。';
+        statusMsg.classList.remove('ok', 'no');
+        updateHUD();
+      }
 
-  // HUD + timer
-  function updateHUD(){
-    scoreEl.textContent=score;
-    timerEl.textContent=timeLeft;
-    streakEl.textContent=streak;
-  }
-  function startTimer(){
-    clearInterval(timerInterval);
-    timerInterval=setInterval(()=>{
-      timeLeft--;
-      updateHUD();
-      if(timeLeft<=0){
+      // Tiles
+      function makeTile(word) {
+        const t = document.createElement('div');
+        t.className = 'tile';
+        t.textContent = word;
+        t.draggable = true;
+        t.addEventListener('click', () => placeTile(t));
+        t.addEventListener('dragstart', onDragStart);
+        t.addEventListener('dragend', onDragEnd);
+        return t;
+      }
+
+      // Click to place into first empty slot
+      function placeTile(tile) {
+        if (!gameActive) return;
+        const empty = findFirstEmptySlot();
+        if (!empty) return;
+        moveTileToSlot(tile, empty);
+        checkIfComplete();
+      }
+
+      function returnTile(slot) {
+        if (!gameActive) return;
+        if (!slot.classList.contains('filled')) return;
+        const tile = slot.querySelector('.tile');
+        if (tile) moveTileToBankFromSlot(tile, slot);
+      }
+
+      function findFirstEmptySlot() {
+        return [...targetEl.children].find(s => !s.classList.contains('filled'));
+      }
+
+      // Drag & drop
+      const dragData = { el: null, from: '', fromSlotIndex: -1 };
+      function onDragStart(e) {
+        if (!gameActive) return;
+        const tile = e.currentTarget;
+        dragData.el = tile;
+        const parent = tile.parentElement;
+        if (parent && parent.classList.contains('slot')) {
+          dragData.from = 'slot';
+          dragData.fromSlotIndex = Number(parent.dataset.index);
+        } else {
+          dragData.from = 'bank';
+          dragData.fromSlotIndex = -1;
+        }
+        tile.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', tile.textContent);
+        e.dataTransfer.effectAllowed = 'move';
+      }
+      function onDragEnd(e) {
+        const tile = e.currentTarget;
+        tile.classList.remove('dragging');
+        dragData.el = null; dragData.from = ''; dragData.fromSlotIndex = -1;
+        removeDropHover();
+      }
+      function onDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        e.currentTarget.classList.add('drophover');
+      }
+      function onDragLeave(e) { e.currentTarget.classList.remove('drophover'); }
+      function removeDropHover() { document.querySelectorAll('.drophover').forEach(n => n.classList.remove('drophover')); }
+
+      function onDropSlot(e) {
+        e.preventDefault();
+        const slot = e.currentTarget;
+        slot.classList.remove('drophover');
+        const tile = dragData.el;
+        if (!tile || !gameActive) return;
+
+        const targetIndex = Number(slot.dataset.index);
+        if (dragData.from === 'slot' && dragData.fromSlotIndex === targetIndex) return;
+
+        if (!slot.classList.contains('filled')) {
+          if (dragData.from === 'slot') {
+            const fromSlot = targetEl.children[dragData.fromSlotIndex];
+            moveTileBetweenSlots(fromSlot, slot);
+          } else {
+            moveTileToSlot(tile, slot);
+          }
+        } else {
+          if (dragData.from === 'slot') {
+            const fromSlot = targetEl.children[dragData.fromSlotIndex];
+            swapSlots(fromSlot, slot);
+          } else {
+            const occupiedTile = slot.querySelector('.tile');
+            if (occupiedTile) bankEl.appendChild(occupiedTile);
+            moveTileToSlot(tile, slot);
+          }
+        }
+        checkIfComplete();
+      }
+
+      function onDropBank(e) {
+        e.preventDefault();
+        bankEl.classList.remove('drophover');
+        const tile = dragData.el;
+        if (!tile || !gameActive) return;
+        if (dragData.from === 'slot') {
+          const fromSlot = targetEl.children[dragData.fromSlotIndex];
+          moveTileToBankFromSlot(tile, fromSlot);
+        }
+      }
+
+      // Move helpers
+      function moveTileToSlot(tile, slot) {
+        const oldParent = tile.parentElement;
+        if (oldParent && oldParent.classList.contains('slot')) {
+          const oldIndex = Number(oldParent.dataset.index);
+          oldParent.classList.remove('filled');
+          oldParent.textContent = '';
+          slots[oldIndex] = null;
+        }
+        slot.textContent = '';
+        slot.appendChild(tile);
+        slot.classList.add('filled');
+        slots[Number(slot.dataset.index)] = tile.textContent;
+      }
+
+      function moveTileBetweenSlots(fromSlot, toSlot) {
+        const tile = fromSlot.querySelector('.tile');
+        if (!tile) return;
+        const fromIndex = Number(fromSlot.dataset.index);
+        const toIndex = Number(toSlot.dataset.index);
+
+        const other = toSlot.querySelector('.tile');
+        if (other) {
+          fromSlot.textContent = '';
+          fromSlot.appendChild(other);
+          fromSlot.classList.add('filled');
+          slots[fromIndex] = other.textContent;
+
+          toSlot.textContent = '';
+          toSlot.appendChild(tile);
+          toSlot.classList.add('filled');
+          slots[toIndex] = tile.textContent;
+        } else {
+          toSlot.textContent = '';
+          toSlot.appendChild(tile);
+          toSlot.classList.add('filled');
+          fromSlot.textContent = '';
+          fromSlot.classList.remove('filled');
+          slots[toIndex] = tile.textContent;
+          slots[fromIndex] = null;
+        }
+      }
+
+      function swapSlots(slotA, slotB) {
+        const tileA = slotA.querySelector('.tile');
+        const tileB = slotB.querySelector('.tile');
+        const idxA = Number(slotA.dataset.index);
+        const idxB = Number(slotB.dataset.index);
+        if (!tileA || !tileB) return;
+
+        slotA.textContent = '';
+        slotB.textContent = '';
+        slotA.appendChild(tileB);
+        slotB.appendChild(tileA);
+        slotA.classList.add('filled');
+        slotB.classList.add('filled');
+        slots[idxA] = tileB.textContent;
+        slots[idxB] = tileA.textContent;
+      }
+
+      function moveTileToBankFromSlot(tile, slot) {
+        const idx = Number(slot.dataset.index);
+        bankEl.appendChild(tile);
+        slot.textContent = '';
+        slot.classList.remove('filled');
+        slots[idx] = null;
+      }
+
+      // Completion check + combo scoring
+      function checkIfComplete() {
+        if (!slots.every(s => s !== null)) return;
+        const attempt = slots.join(' ');
+        const target = sentenceToWords(current).join(' ');
+        if (attempt.toLowerCase() === target.toLowerCase()) {
+          const gained = 10 * streak; // score with current streak
+          score += gained;
+          statusMsg.textContent = `✅ 正确（连对 ${streak}），+${gained} 分：${current}`;
+          statusMsg.classList.remove('no'); statusMsg.classList.add('ok');
+          playChime();
+          streak += 1; // increase streak after scoring
+          round++;
+          if (round >= order.length) { order = shuffle([...sentences]); round = 0; }
+          setTimeout(() => { if (gameActive) { renderRound(); speak(current); } }, 450);
+        } else {
+          statusMsg.textContent = '❌ 不对，连续已重置为 1，再试一次。';
+          statusMsg.classList.remove('ok'); statusMsg.classList.add('no');
+          playBuzz();
+          streak = 1; // reset streak on mistake
+          setTimeout(() => { if (gameActive) { renderRound(); speak(current); } }, 450);
+        }
+        updateHUD();
+      }
+
+      // HUD + timer
+      function updateHUD() {
+        scoreEl.textContent = score;
+        timerEl.textContent = timeLeft;
+        streakEl.textContent = streak;
+      }
+      function startTimer() {
         clearInterval(timerInterval);
-        endGame();
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          updateHUD();
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            endGame();
+          }
+        }, 1000);
       }
-    },1000);
-  }
-  function endGame(){
-    gameActive=false;
-    finalScore.textContent=score;
-    endScreen.style.display='flex';
-  }
+      function endGame() {
+        gameActive = false;
+        finalScore.textContent = score;
+        endScreen.style.display = 'flex';
+      }
 
-  // Events
-  startBtn.addEventListener('click',()=>{ overlay.style.display='none'; startGame(); });
-  repeatBtn.addEventListener('click',()=>{ if(gameActive){ ensureAudioCtx(); speak(current); }});
-  retryBtn.addEventListener('click',()=>{ endScreen.style.display='none'; startGame(); });
-})();
-</script>
+      // Events
+      // Init Class Selector
+      const classSelector = document.getElementById('classSelector');
+      const classButtons = document.getElementById('classButtons');
+
+      if (typeof CURRICULUM !== 'undefined') {
+        Object.keys(CURRICULUM).forEach(key => {
+          const btn = document.createElement('button');
+          btn.className = 'primary';
+          btn.textContent = CURRICULUM[key].label;
+          btn.style.width = '100%';
+          btn.onclick = () => {
+            sentences = CURRICULUM[key].content;
+            classSelector.style.display = 'none';
+            overlay.style.display = 'flex';
+          };
+          classButtons.appendChild(btn);
+        });
+      } else {
+        classButtons.innerHTML = '<p style="color:red">Error: Data not loaded.</p>';
+      }
+
+      startBtn.addEventListener('click', () => { overlay.style.display = 'none'; startGame(); });
+      repeatBtn.addEventListener('click', () => { if (gameActive) { ensureAudioCtx(); speak(current); } });
+      retryBtn.addEventListener('click', () => { endScreen.style.display = 'none'; startGame(); });
+    })();
+  </script>
 </body>
+
 </html>
 ```
