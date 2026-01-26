@@ -21,13 +21,11 @@ window.CURRICULUM = {
             "A bag is on the base.",
             "The bat is in the cave.",
             "The rat is in the cage.",
-            "The jam is in the vase.",
             "The man is in the lane.",
             "The map is in a case.",
             "The pan is in the lake.",
             "The lad is in the cave.",
             "A cat is in the lane.",
-            "A rat is in the vase.",
             "A fan is in the cave.",
             "A bat is in the cage.",
             "A cap is in the lake."
