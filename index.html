@@ -599,6 +599,7 @@
         slot.textContent = '';
         slot.classList.remove('filled');
         slots[idx] = null;
+        checkIfComplete();
       }
 
       // Completion check
@@ -606,13 +607,11 @@
         // Reset feedback on all tiles in slots currently
         document.querySelectorAll('.slot .tile').forEach(t => t.classList.remove('correct', 'incorrect'));
 
-        if (!slots.every(s => s !== null)) return;
-
         const targetWords = sentenceToWords(current);
-        let allCorrect = true;
 
-        // Apply visual feedback
+        // Apply visual feedback for any placed tiles
         slots.forEach((word, index) => {
+          if (word === null) return;
           const slot = targetEl.children[index];
           const tile = slot.querySelector('.tile');
           if (tile) {
@@ -620,10 +619,17 @@
               tile.classList.add('correct');
             } else {
               tile.classList.add('incorrect');
-              allCorrect = false;
             }
           }
         });
+
+        // Only trigger completion/failure message if the sentence is full
+        if (!slots.every(s => s !== null)) {
+          updateHUD();
+          return;
+        }
+
+        const allCorrect = slots.every((word, index) => word.toLowerCase() === targetWords[index].toLowerCase());
 
         if (allCorrect) {
           // Correct!
@@ -641,76 +647,70 @@
             setTimeout(() => { if (gameActive) { renderRound(); speak(current); } }, 1000);
           }
         } else {
-          // Incorrect
+          // Incorrect (Full)
           statusMsg.textContent = '❌ 不对，请调整红色单词的位置。';
           statusMsg.classList.remove('ok'); statusMsg.classList.add('no');
           playBuzz();
         }
         updateHUD();
       }
-      // Optionally reset? The prompt says "don't let the student go to the next sentence until... correct".
-      // Usually better to let them adjust tiles rather than full reset.
-      // But to be helpful, maybe we can reject only the wrong ones? 
-      // For simple mechanics: just play buzz and keep tiles as is.
-    }
-        updateHUD();
+
+
+      // HUD + timer
+      function updateHUD() {
+        progressEl.textContent = `${completedCount}/${GOAL}`;
       }
 
-    // HUD + timer
-    function updateHUD() {
-      progressEl.textContent = `${completedCount}/${GOAL}`;
-    }
+      function formatTime(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        return `${m}分${s}秒`;
+      }
 
-    function formatTime(ms) {
-      const totalSeconds = Math.floor(ms / 1000);
-      const m = Math.floor(totalSeconds / 60);
-      const s = totalSeconds % 60;
-      return `${m}分${s}秒`;
-    }
+      function startTimer() {
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          if (!gameActive) return;
+          const elapsed = Date.now() - startTime;
+          timerEl.textContent = Math.floor(elapsed / 1000) + 's';
+        }, 1000);
+      }
 
-    function startTimer() {
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        if (!gameActive) return;
-        const elapsed = Date.now() - startTime;
-        timerEl.textContent = Math.floor(elapsed / 1000) + 's';
-      }, 1000);
-    }
+      function endGame() {
+        gameActive = false;
+        clearInterval(timerInterval);
+        const totalTime = formatTime(Date.now() - startTime);
+        finalTimeEl.textContent = totalTime;
+        endScreen.style.display = 'flex';
+      }
 
-    function endGame() {
-      gameActive = false;
-      clearInterval(timerInterval);
-      const totalTime = formatTime(Date.now() - startTime);
-      finalTimeEl.textContent = totalTime;
-      endScreen.style.display = 'flex';
-    }
+      // Events
+      // Init Class Selector
+      const classSelector = document.getElementById('classSelector');
+      const classButtons = document.getElementById('classButtons');
 
-    // Events
-    // Init Class Selector
-    const classSelector = document.getElementById('classSelector');
-    const classButtons = document.getElementById('classButtons');
+      if (typeof CURRICULUM !== 'undefined') {
+        Object.keys(CURRICULUM).forEach(key => {
+          const btn = document.createElement('button');
+          btn.className = 'primary';
+          btn.textContent = CURRICULUM[key].label;
+          btn.style.width = '100%';
+          btn.onclick = () => {
+            sentences = CURRICULUM[key].content;
+            classSelector.style.display = 'none';
+            overlay.style.display = 'flex';
+          };
+          classButtons.appendChild(btn);
+        });
+      } else {
+        classButtons.innerHTML = '<p style="color:red">Error: Data not loaded.</p>';
+      }
 
-    if (typeof CURRICULUM !== 'undefined') {
-      Object.keys(CURRICULUM).forEach(key => {
-        const btn = document.createElement('button');
-        btn.className = 'primary';
-        btn.textContent = CURRICULUM[key].label;
-        btn.style.width = '100%';
-        btn.onclick = () => {
-          sentences = CURRICULUM[key].content;
-          classSelector.style.display = 'none';
-          overlay.style.display = 'flex';
-        };
-        classButtons.appendChild(btn);
-      });
-    } else {
-      classButtons.innerHTML = '<p style="color:red">Error: Data not loaded.</p>';
-    }
-
-    startBtn.addEventListener('click', () => { overlay.style.display = 'none'; startGame(); });
-    repeatBtn.addEventListener('click', () => { if (gameActive) { ensureAudioCtx(); speak(current); } });
-    retryBtn.addEventListener('click', () => { endScreen.style.display = 'none'; startGame(); });
-    }) ();
+      startBtn.addEventListener('click', () => { overlay.style.display = 'none'; startGame(); });
+      repeatBtn.addEventListener('click', () => { if (gameActive) { ensureAudioCtx(); speak(current); } });
+      retryBtn.addEventListener('click', () => { endScreen.style.display = 'none'; startGame(); });
+    })();
   </script>
 </body>
 
