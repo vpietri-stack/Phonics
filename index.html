@@ -709,14 +709,20 @@
       const classSelector = document.getElementById('classSelector');
       const classButtons = document.getElementById('classButtons');
 
-      if (typeof CURRICULUM !== 'undefined') {
-        Object.keys(CURRICULUM).forEach(key => {
+      if (typeof CLASSES !== 'undefined' && typeof CONTENT_SETS !== 'undefined') {
+        Object.keys(CLASSES).forEach(key => {
           const btn = document.createElement('button');
           btn.className = 'primary';
-          btn.textContent = CURRICULUM[key].label;
+          btn.textContent = CLASSES[key].label;
           btn.style.width = '100%';
           btn.onclick = () => {
-            sentences = CURRICULUM[key].content;
+            // Combine all content sets assigned to this class
+            sentences = [];
+            CLASSES[key].contentSets.forEach(setName => {
+              if (CONTENT_SETS[setName]) {
+                sentences = sentences.concat(CONTENT_SETS[setName]);
+              }
+            });
             classSelector.style.display = 'none';
             overlay.style.display = 'flex';
           };
