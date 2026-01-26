@@ -296,8 +296,7 @@
   <script>
     /* Version: 1.0 (combo scoring + CN UI + worksheet theme) */
     (() => {
-      // TTS: Youdao (Type 1 = UK)
-      const TTS_BASE = 'https://dict.youdao.com/dictvoice';
+
 
       // State
       let sentences = [];
@@ -334,9 +333,8 @@
       }
 
       function speak(text) {
-        const youdaoUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
+        const youdaoUrl = `https://dict.youdao.com/dictvoice?audio=${text}&type=1`;
         const audio = new Audio(youdaoUrl);
-        audio.volume = 0.95;
         audio.onerror = () => fallbackSpeech(text);
         const p = audio.play();
         if (p !== undefined) p.catch(() => fallbackSpeech(text));
