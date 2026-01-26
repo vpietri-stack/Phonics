@@ -332,26 +332,24 @@
         const o = audioCtx.createOscillator(); o.type = 'square'; o.frequency.setValueAtTime(140, now); o.connect(g); o.start(now); o.stop(now + .25);
       }
 
+      // TTS: Baidu basic TTS (British English)
+      const TTS_BASE = 'https://fanyi.baidu.com/gettts';
+      const TTS_LANG = 'uk';
+      const TTS_SPD = 3;
+      const TTS_SOURCE = 'web';
+
+      function ttsUrl(text) {
+        return `${TTS_BASE}?lan=${encodeURIComponent(TTS_LANG)}&text=${encodeURIComponent(text)}&spd=${TTS_SPD}&source=${TTS_SOURCE}`;
+      }
       function speak(text) {
-        const youdaoUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`;
-        const audio = new Audio(youdaoUrl);
-        audio.onerror = () => fallbackSpeech(text);
-        const p = audio.play();
-        if (p !== undefined) p.catch(() => fallbackSpeech(text));
+        const audioEl = new Audio();
+        audioEl.src = ttsUrl(text);
+        audioEl.volume = 0.95;
+        audioEl.currentTime = 0;
+        audioEl.play().catch(() => { });
       }
 
-      function fallbackSpeech(text) {
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          const u = new SpeechSynthesisUtterance(text);
-          u.rate = 0.9;
-          const voices = window.speechSynthesis.getVoices();
-          // Try to find a UK voice
-          const v = voices.find(val => val.lang.includes('GB') || val.lang.includes('UK'));
-          if (v) u.voice = v;
-          window.speechSynthesis.speak(u);
-        }
-      }
+
 
       // DOM
       const overlay = document.getElementById('overlay');
