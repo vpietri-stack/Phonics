@@ -324,65 +324,87 @@
       let gameActive = false;
       const GOAL = 10;
 
-      // Audio
-      let audioCtx = null;
-      const audioEl = new Audio();
-      audioEl.volume = 0.95;
+      // Audio Utils (from spelling-game)
+      const AudioUtils = {
+        audioCtx: null,
+        audioElement: null,
 
-      function ensureAudioCtx() {
-        if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-        if (audioCtx.state === 'suspended') { audioCtx.resume().catch(() => { }); }
-        // Also "unlock" the persistent audio element
-        audioEl.play().then(() => { audioEl.pause(); }).catch(() => { });
-      }
+        init: function () {
+          if (!this.audioElement) {
+            this.audioElement = document.createElement('audio');
+            this.audioElement.id = 'audioPlayer';
+            this.audioElement.style.display = 'none';
+            document.body.appendChild(this.audioElement);
+          }
 
-      function playChime() {
-        if (!audioCtx) return;
-        const now = audioCtx.currentTime;
-        const g = audioCtx.createGain();
-        g.gain.setValueAtTime(.0001, now);
-        g.gain.exponentialRampToValueAtTime(.18, now + .01);
-        g.gain.exponentialRampToValueAtTime(.0001, now + .35);
-        g.connect(audioCtx.destination);
-        const o1 = audioCtx.createOscillator(); o1.type = 'sine'; o1.frequency.setValueAtTime(880, now); o1.connect(g); o1.start(now); o1.stop(now + .18);
-        const o2 = audioCtx.createOscillator(); o2.type = 'sine'; o2.frequency.setValueAtTime(1319, now + .1); o2.connect(g); o2.start(now + .1); o2.stop(now + .32);
-      }
+          if (!this.audioCtx) {
+            try {
+              this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+              console.log("Audio not supported");
+            }
+          }
+          if (this.audioCtx && this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume();
+          }
+        },
 
-      function playBuzz() {
-        if (!audioCtx) return;
-        const now = audioCtx.currentTime;
-        const g = audioCtx.createGain();
-        g.gain.setValueAtTime(.0001, now);
-        g.gain.exponentialRampToValueAtTime(.22, now + .01);
-        g.gain.exponentialRampToValueAtTime(.0001, now + .25);
-        g.connect(audioCtx.destination);
-        const o = audioCtx.createOscillator(); o.type = 'square'; o.frequency.setValueAtTime(140, now); o.connect(g); o.start(now); o.stop(now + .25);
-      }
+        playSound: function (type) {
+          if (!this.audioCtx) return;
+          if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
 
-      function speak(text) {
-        // Exact original Baidu URL and parameters
-        const url = `https://fanyi.baidu.com/gettts?lan=uk&text=${encodeURIComponent(text)}&spd=3&source=web`;
-        audioEl.src = url;
+          const osc = this.audioCtx.createOscillator();
+          const gainNode = this.audioCtx.createGain();
+          osc.connect(gainNode);
+          gainNode.connect(this.audioCtx.destination);
+          const now = this.audioCtx.currentTime;
 
-        audioEl.onerror = () => fallbackSpeech(text);
-        audioEl.currentTime = 0;
-        const p = audioEl.play();
-        if (p !== undefined) p.catch(() => fallbackSpeech(text));
-      }
+          if (type === 'chime') { // Adapted from original chime
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, now);
+            gainNode.gain.setValueAtTime(0.0001, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.18, now + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+            osc.start(now);
+            osc.stop(now + 0.18);
 
-      function fallbackSpeech(text) {
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          const u = new SpeechSynthesisUtterance(text);
-          u.rate = 0.9;
-          const voices = window.speechSynthesis.getVoices();
-          const v = voices.find(val => val.lang.includes('GB') || val.lang.includes('UK'));
-          if (v) u.voice = v;
-          window.speechSynthesis.speak(u);
+            // Second tone for chime
+            const osc2 = this.audioCtx.createOscillator();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(1319, now + 0.1);
+            osc2.connect(gainNode);
+            osc2.start(now + 0.1);
+            osc2.stop(now + 0.32);
+          } else if (type === 'buzz') { // Adapted from original buzz
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(140, now);
+            gainNode.gain.setValueAtTime(0.0001, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.22, now + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+            osc.start(now);
+            osc.stop(now + 0.25);
+          }
+        },
+
+        speakWord: function (text) {
+          if (!this.audioElement) this.init();
+          // Use exact URL structure from PU2 U3 sample
+          this.audioElement.src = `https://fanyi.baidu.com/gettts?lan=uk&text=${encodeURIComponent(text)}&spd=3&source=web`;
+          this.audioElement.play().catch(e => console.log("Audio play failed:", e));
+        },
+
+        fallbackSpeech: function (text) {
+          if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.rate = 0.9;
+            const voices = window.speechSynthesis.getVoices();
+            const v = voices.find(val => val.lang.includes('GB') || val.lang.includes('UK'));
+            if (v) u.voice = v;
+            window.speechSynthesis.speak(u);
+          }
         }
-      }
-
-
+      };
 
       // DOM
       const overlay = document.getElementById('overlay');
@@ -404,14 +426,14 @@
 
       // Start/restart
       function startGame() {
-        ensureAudioCtx();
+        AudioUtils.init();
         order = shuffle([...sentences]);
         round = 0; completedCount = 0; gameActive = true;
         startTime = Date.now();
         statusMsg.classList.remove('ok', 'no');
         updateHUD();
         renderRound();
-        speak(current);
+        AudioUtils.speakWord(current);
         startTimer();
       }
 
@@ -655,7 +677,7 @@
           completedCount++;
           statusMsg.textContent = `✅ 正确！`;
           statusMsg.classList.remove('no'); statusMsg.classList.add('ok');
-          playChime();
+          AudioUtils.playSound('chime');
 
           if (completedCount >= GOAL) {
             endGame();
@@ -663,13 +685,13 @@
             round++;
             // Wrap around if we run out of sentences
             if (round >= order.length) { order = shuffle([...sentences]); round = 0; }
-            setTimeout(() => { if (gameActive) { renderRound(); speak(current); } }, 1000);
+            setTimeout(() => { if (gameActive) { renderRound(); AudioUtils.speakWord(current); } }, 1000);
           }
         } else {
           // Incorrect (Full)
           statusMsg.textContent = '❌ 不对，请调整红色单词的位置。';
           statusMsg.classList.remove('ok'); statusMsg.classList.add('no');
-          playBuzz();
+          AudioUtils.playSound('buzz');
         }
         updateHUD();
       }
@@ -733,7 +755,7 @@
       }
 
       startBtn.addEventListener('click', () => { overlay.style.display = 'none'; startGame(); });
-      repeatBtn.addEventListener('click', () => { if (gameActive) { ensureAudioCtx(); speak(current); } });
+      repeatBtn.addEventListener('click', () => { if (gameActive) { AudioUtils.init(); AudioUtils.speakWord(current); } });
       retryBtn.addEventListener('click', () => { endScreen.style.display = 'none'; startGame(); });
 
       // --- MOBILE TOUCH DRAG & DROP ---
