@@ -27,12 +27,44 @@ window.CONTENT_SETS = {
         "A fan is in the cave.",
         "A bat is in the cage.",
         "A cap is in the lake."
+    ],
+    "CVC (a,i) and CVCE (a,i)": [
+        "The kid has a bike.",
+        "The pig has a pipe.",
+        "The dad has a file.",
+        "The man has a dime.",
+        "The rat has a lime.",
+        "The kid has a cape.",
+        "The pig has a cake.",
+        "The wife has a fan.",
+        "The pin is on the gate.",
+        "The wig is on the rake.",
+        "The fig is on the case.",
+        "The bib is on the line.",
+        "The lid is on the file.",
+        "The lime is on the mat.",
+        "The dime is on the pad.",
+        "The kite is on the van.",
+        "The pine is on the map.",
+        "A pin is on the tile.",
+        "A wig is on the cane.",
+        "The pig is in the lake.",
+        "The kid is in the cave.",
+        "The pin is in the pipe.",
+        "The fig is in the pile.",
+        "The bat is in the pine.",
+        "The rat is in the vine.",
+        "The bike is in the van.",
+        "The kite is in the bin.",
+        "The dime is in the bag.",
+        "The file is in the bag.",
+        "A pig is in the cage."
     ]
 };
 
 window.CLASSES = {
     "寒假班_CVCE_1630_1800": {
-        label: "寒假班 CVCE 16-30-18-00",
-        contentSets: ["CVC (a) and CVCE (a)"]
+        label: "寒假班 CVCE 16:30-18:00",
+        contentSets: ["CVC (a,i) and CVCE (a,i)"]
     }
 };
