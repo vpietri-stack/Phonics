@@ -324,12 +324,13 @@
       let gameActive = false;
       const GOAL = 10;
 
-      // Audio Utils (from spelling-game)
+      // Audio Utils
       const AudioUtils = {
         audioCtx: null,
         audioElement: null,
 
         init: function () {
+          // 1. Setup TTS Audio Element (Persistent)
           if (!this.audioElement) {
             this.audioElement = document.createElement('audio');
             this.audioElement.id = 'audioPlayer';
@@ -337,6 +338,15 @@
             document.body.appendChild(this.audioElement);
           }
 
+          // CRITICAL: Unlock Audio on first user interaction (Start Game)
+          // We play empty sound or pause immediately to "bless" the element for iOS
+          this.audioElement.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMD//////////////////////////////////////////////////////////////////wAAAAAATGF2YzU4LjU0AAAAAAAAAAAAAAAAJAAAAAAAAAAAASAAAAAA//OUAAAAAAAAAAAAAAAAAAAAAAA=';
+          this.audioElement.play().then(() => {
+            this.audioElement.pause();
+            this.audioElement.currentTime = 0;
+          }).catch(e => console.log("Audio unlock failed (likely auto-blocked until touch):", e));
+
+          // 2. Setup SFX Context
           if (!this.audioCtx) {
             try {
               this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -359,7 +369,7 @@
           gainNode.connect(this.audioCtx.destination);
           const now = this.audioCtx.currentTime;
 
-          if (type === 'chime') { // Adapted from original chime
+          if (type === 'chime') {
             osc.type = 'sine';
             osc.frequency.setValueAtTime(880, now);
             gainNode.gain.setValueAtTime(0.0001, now);
@@ -368,14 +378,13 @@
             osc.start(now);
             osc.stop(now + 0.18);
 
-            // Second tone for chime
             const osc2 = this.audioCtx.createOscillator();
             osc2.type = 'sine';
             osc2.frequency.setValueAtTime(1319, now + 0.1);
             osc2.connect(gainNode);
             osc2.start(now + 0.1);
             osc2.stop(now + 0.32);
-          } else if (type === 'buzz') { // Adapted from original buzz
+          } else if (type === 'buzz') {
             osc.type = 'square';
             osc.frequency.setValueAtTime(140, now);
             gainNode.gain.setValueAtTime(0.0001, now);
@@ -388,22 +397,13 @@
 
         speakWord: function (text) {
           if (!this.audioElement) this.init();
-          // Use exact URL structure from PU2 U3 sample
+          // Baidu TTS with No-Referrer workaround (via HTML meta tag)
           this.audioElement.src = `https://fanyi.baidu.com/gettts?lan=uk&text=${encodeURIComponent(text)}&spd=3&source=web`;
           this.audioElement.play().catch(e => console.log("Audio play failed:", e));
         },
 
-        fallbackSpeech: function (text) {
-          if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(text);
-            u.rate = 0.9;
-            const voices = window.speechSynthesis.getVoices();
-            const v = voices.find(val => val.lang.includes('GB') || val.lang.includes('UK'));
-            if (v) u.voice = v;
-            window.speechSynthesis.speak(u);
-          }
-        }
+        // Alias for backward compatibility if needed
+        speak: function (text) { this.speakWord(text); }
       };
 
       // DOM
