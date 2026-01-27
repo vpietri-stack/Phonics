@@ -398,10 +398,12 @@
           if (!this.audioElement) this.init();
 
           // 1. Try local MP3 first
-          // Files have been renamed to: "Sentence text.mp3" e.g. "The kid has a bike.mp3"
-          const mp3Path = `js/audio mp3/${text.trim()}.mp3`;
+          // Files are in "js/audio_mp3/" and named "Sentence text.mp3" (without trailing period of the sentence)
+          const baseName = text.trim().replace(/\.$/, '');
+          const mp3Path = `js/audio_mp3/${baseName}.mp3`;
 
           const playMp3 = () => {
+            // Encode path to handle spaces in the filename safely
             this.audioElement.src = mp3Path;
             this.audioElement.play()
               .catch((e) => {
