@@ -59,12 +59,50 @@ window.CONTENT_SETS = {
         "The dime is in the bag.",
         "The file is in the bag.",
         "A pig is in the cage."
+    ],
+    "CVC (a,i,o) and CVCE (a,i,o)": [
+        "The dog has a bone.",
+        "The fox has a home.",
+        "The cop has a code.",
+        "The mom has a rose.",
+        "The box has a rope.",
+        "The man has a robe.",
+        "The cat has a home.",
+        "The pig has a nose.",
+        "The dad has a vote.",
+        "The kid has a cone.",
+        "The dog has a name.",
+        "The mom has a bike.",
+        "The rod is on the cone.",
+        "The pot is on the pole.",
+        "The mop is on the tile.",
+        "The log is on the pile.",
+        "The dog is on the rope.",
+        "The fox is on the case.",
+        "The box is on the line.",
+        "The hog is on the gate.",
+        "The bone is on the mat.",
+        "The cone is on the box.",
+        "The rose is on the bed.",
+        "The note is on the pad.",
+        "A pot is on the stove.",
+        "A dog is on the lane.",
+        "A cop is on the phone.",
+        "A fox is on the dike.",
+        "The dog is in the hole.",
+        "The fox is in the zone.",
+        "The box is in the cave.",
+        "The rod is in the lake.",
+        "The bone is in the pan.",
+        "The note is in the box.",
+        "A dog is in the home.",
+        "A fox is in the cage."
     ]
 };
 
 window.CLASSES = {
     "寒假班_CVCE_1630_1800": {
         label: "寒假班 CVCE 16:30-18:00",
-        contentSets: ["CVC (a,i) and CVCE (a,i)"]
+        contentSets: ["CVC (a,i,o) and CVCE (a,i,o)"]
     }
 };
