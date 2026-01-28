@@ -87,7 +87,6 @@ window.CONTENT_SETS = {
         "The note is on the pad.",
         "A pot is on the stove.",
         "A dog is on the lane.",
-        "A cop is on the phone.",
         "A fox is on the dike.",
         "The dog is in the hole.",
         "The fox is in the zone.",
