@@ -96,12 +96,66 @@ window.CONTENT_SETS = {
         "The note is in the box.",
         "A dog is in the home.",
         "A fox is in the cage."
+    ],
+    "CVC (a,e,i,o,u) and CVCE (a,i,o,u)": [
+        "The pup has a bone.",
+        "The mule has a cup.",
+        "The bug has a home.",
+        "The duke has a dog.",
+        "The hen has a cage.",
+        "The vet has a case.",
+        "The cub has a cone.",
+        "The man has a mule.",
+        "The pen has a code.",
+        "The nut has a hole.",
+        "The pet has a name.",
+        "The tub has a hose.",
+        "The bus has a fume.",
+        "The sun has a zone.",
+        "The gum is on the tile.",
+        "The bug is on the tape.",
+        "The rug is on the line.",
+        "The mug is on the file.",
+        "The bun is on the plate.",
+        "The cup is on the cube.",
+        "The mud is on the robe.",
+        "The pup is on the dune.",
+        "The hen is on the rake.",
+        "A web is on the gate.",
+        "The leg is on the rope.",
+        "The bed is on the lane.",
+        "The jet is on the base.",
+        "The net is on the pole.",
+        "The tube is on the rug.",
+        "The cube is on the box.",
+        "The fuse is on the box.",
+        "A bug is on the rose.",
+        "A cub is on the dune.",
+        "A pen is on the note.",
+        "A hen is on the bike.",
+        "The pup is in the cave.",
+        "The bus is in the lane.",
+        "The bug is in the tube.",
+        "The nut is in the cake.",
+        "The gum is in the case.",
+        "The mud is in the hole.",
+        "The hen is in the cage.",
+        "The pen is in the bag.",
+        "The jet is in the zone.",
+        "The net is in the lake.",
+        "The cube is in the bin.",
+        "The mule is in the mud.",
+        "The tube is in the box.",
+        "A bug is in the rug."
     ]
 };
 
 window.CLASSES = {
     "寒假班_CVCE_1630_1800": {
         label: "寒假班 CVCE 16:30-18:00",
-        contentSets: ["CVC (a,i,o) and CVCE (a,i,o)"]
+        contentSets: [
+
+            "CVC (a,i,o) and CVCE (a,i,o)",
+        ]
     }
 };
