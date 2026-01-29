@@ -155,7 +155,7 @@ window.CLASSES = {
         label: "寒假班 CVCE 16:30-18:00",
         contentSets: [
 
-            "CVC (a,i,o) and CVCE (a,i,o)",
+            "CVC (a,e,i,o,u) and CVCE (a,i,o,u)",
         ]
     }
 };
