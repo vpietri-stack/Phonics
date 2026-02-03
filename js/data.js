@@ -1,5 +1,5 @@
 window.CONTENT_SETS = {
-    "CVC (a) and CVCE (a)": [
+    "1. CVC (a) and CVCE (a)": [
         "The man has a cane.",
         "The cat has a name.",
         "The lad has a cake.",
@@ -28,7 +28,7 @@ window.CONTENT_SETS = {
         "A bat is in the cage.",
         "A cap is in the lake."
     ],
-    "CVC (a,i) and CVCE (a,i)": [
+    "2. CVC (a,i) and CVCE (a,i)": [
         "The kid has a bike.",
         "The pig has a pipe.",
         "The dad has a file.",
@@ -60,7 +60,7 @@ window.CONTENT_SETS = {
         "The file is in the bag.",
         "A pig is in the cage."
     ],
-    "CVC (a,i,o) and CVCE (a,i,o)": [
+    "3. CVC (a,i,o) and CVCE (a,i,o)": [
         "The dog has a bone.",
         "The fox has a home.",
         "The cop has a code.",
@@ -97,7 +97,7 @@ window.CONTENT_SETS = {
         "A dog is in the home.",
         "A fox is in the cage."
     ],
-    "CVC (a,e,i,o,u) and CVCE (a,i,o,u)": [
+    "4. CVC (a,e,i,o,u) and CVCE (a,i,o,u)": [
         "The pup has a bone.",
         "The mule has a cup.",
         "The bug has a home.",
@@ -147,6 +147,47 @@ window.CONTENT_SETS = {
         "The mule is in the mud.",
         "The tube is in the box.",
         "A bug is in the rug."
+    ],
+    "5. CVC (a,e,i,o,u), CVCE (a,i,o,u), OO and EE": [
+        "The man has a jeep.",
+        "The dog has food.",
+        "The bee has a home.",
+        "The dad has a tool.",
+        "The kid has a hoop.",
+        "The rat has a seed.",
+        "The cat has a boot.",
+        "The bug has feet.",
+        "The fox has a mood.",
+        "The nun has a hood.",
+        "The man has a book.",
+        "The bee is on the rose.",
+        "The cat is on the roof.",
+        "The bug is on the boot.",
+        "The seed is on the rug.",
+        "The root is on the tile.",
+        "The beet is on the mat.",
+        "The hoop is on the peg.",
+        "The beef is on the bun.",
+        "The book is on the bed.",
+        "The foot is on the rug.",
+        "The bee is on the bike.",
+        "The wig is on the goose.",
+        "The bee is in the hive.",
+        "The foot is in the boot.",
+        "The dog is in the pool.",
+        "The seed is in the hole.",
+        "The bat is in the room.",
+        "The man is in the jeep.",
+        "The food is in the pan.",
+        "The beet is in the pot.",
+        "The weed is in the bin.",
+        "The tool is in the box.",
+        "The wood is in the van.",
+        "The bone is in the pool.",
+        "A jeep is in the lane.",
+        "A bee is in the cone.",
+        "A seed is in the mud.",
+        "A boot is in the lake."
     ]
 };
 
@@ -154,8 +195,19 @@ window.CLASSES = {
     "寒假班_CVCE_1630_1800": {
         label: "寒假班 CVCE 16:30-18:00",
         contentSets: [
-
-            "CVC (a,e,i,o,u) and CVCE (a,i,o,u)",
+            "2. CVC (a,i) and CVCE (a,i)",
+            "3. CVC (a,i,o) and CVCE (a,i,o)",
+            "4. CVC (a,e,i,o,u) and CVCE (a,i,o,u)",
+            "5. CVC (a,e,i,o,u), CVCE (a,i,o,u), OO and EE",
+        ]
+    },
+    "FRI_SUN_1810_1850": {
+        label: "周五/日 18:10-18:50",
+        contentSets: [
+            "2. CVC (a,i) and CVCE (a,i)",
+            "3. CVC (a,i,o) and CVCE (a,i,o)",
+            "4. CVC (a,e,i,o,u) and CVCE (a,i,o,u)",
+            "5. CVC (a,e,i,o,u), CVCE (a,i,o,u), OO and EE",
         ]
     }
 };
