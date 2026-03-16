@@ -268,7 +268,7 @@
     <button class="primary" id="repeatBtn">🔁 再听一遍</button>
     <div id="timer">0s</div>
     <div class="spacer"></div>
-    <div>进度：<span id="progress">0/20</span></div>
+    <div>进度：<span id="progress">0/10</span></div>
   </header>
 
   <main>
@@ -297,7 +297,7 @@
   <div class="overlay" id="overlay" style="display:none;">
     <div class="card">
       <h2>准备好开始了吗？</h2>
-      <p>完成 20 个句子，看看你能多快！</p>
+      <p>完成 10 个句子，看看你能多快！</p>
       <button class="primary" id="startBtn">开始 ▶️</button>
     </div>
   </div>
@@ -306,7 +306,7 @@
   <div class="overlay" id="endScreen" style="display:none;">
     <div class="card">
       <h2>做得好！🎉</h2>
-      <p>你完成了 20 个句子！<br>用时：<span id="finalTime"
+      <p>你完成了 10 个句子！<br>用时：<span id="finalTime"
           style="font-weight:bold; color:var(--primary); font-size:1.4em;"></span></p>
       <button class="primary" id="retryBtn">再来一次？</button>
     </div>
@@ -322,7 +322,7 @@
       let order = [], round = 0, startTime = 0, timerInterval = null, completedCount = 0;
       let current = "", words = [], slots = [], bankOrder = [];
       let gameActive = false;
-      const GOAL = 20;
+      const GOAL = 10;
 
       // Audio Utils
       const AudioUtils = {
