@@ -192,22 +192,10 @@ window.CONTENT_SETS = {
 };
 
 window.CLASSES = {
-    "寒假班_CVCE_1630_1800": {
-        label: "寒假班 CVCE 16:30-18:00",
+    "寒假班_CVCE_1600_1730": {
+        label: "寒假班 CVCE 16:00-17:30",
         contentSets: [
-            "2. CVC (a,i) and CVCE (a,i)",
-            "3. CVC (a,i,o) and CVCE (a,i,o)",
-            "4. CVC (a,e,i,o,u) and CVCE (a,i,o,u)",
-            "5. CVC (a,e,i,o,u), CVCE (a,i,o,u), OO and EE",
-        ]
-    },
-    "FRI_SUN_1810_1850": {
-        label: "周五/日 18:10-18:50",
-        contentSets: [
-            "2. CVC (a,i) and CVCE (a,i)",
-            "3. CVC (a,i,o) and CVCE (a,i,o)",
-            "4. CVC (a,e,i,o,u) and CVCE (a,i,o,u)",
-            "5. CVC (a,e,i,o,u), CVCE (a,i,o,u), OO and EE",
+            "1. CVC (a) and CVCE (a)"
         ]
     }
 };
