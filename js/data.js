@@ -197,6 +197,7 @@ window.CLASSES = {
         contentSets: [
             "1. CVC (a) and CVCE (a)",
             "2. CVC (a,i) and CVCE (a,i)",
+            "3. CVC (a,i,o) and CVCE (a,i,o)"
         ]
     }
 };
